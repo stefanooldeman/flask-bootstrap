@@ -1,0 +1,2 @@
+dawkins deploy dev-requirements.txt docs Makefile README README.md requirements.txt run.py scafold.sh setup.py start_gunicorn tmp
+!.gitignore

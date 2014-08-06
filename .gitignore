@@ -1,0 +1,19 @@
+*.pyc
+*.pyo
+
+#docs / tests
+.coverage
+
+#python builds
+bin
+dist
+build
+include
+lib
+lib64
+*.egg-info
+dump.rdb
+
+#virtualenvs
+.vagrant
+venv

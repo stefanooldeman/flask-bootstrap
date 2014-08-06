@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+if [ -z "$SUPERVISOR_ENABLED" ]; then # when not under supervisord
+  pushd `dirname $0` > /dev/null
+  LOG_DIR=`pwd`/../../tmp
+  popd > /dev/null
+
+  DEBUG="--debug --log-level debug"
+  export META_API_CONFIG_DIR="/tmp/{{package}}/configs"
+  unset META_API_LOG_DIR
+  echo 'using current (virtual)env'
+else  # when under supervisord
+  export META_API_CONFIG_DIR="/tmp/{{package}}/configs"
+  export META_API_LOG_DIR="/var/log/python/{{package}}"
+  LOG_DIR=$META_API_LOG_DIR
+
+  echo 'loading virtualenv'
+  source /opt/virtualenv/<package>/bin/activate
+fi
+
+echo 'start gunicorn'
+# note $PORT gets a default value *assigned*
+gunicorn --workers 3 \
+         ${DEBUG:---log-level info} \
+         --error-logfile ${LOG_DIR}/server.log \
+         --bind 0.0.0.0:${PORT:=8000} run:app
