@@ -24,6 +24,7 @@ class InvalidBodyError(KeyError):
 app = MyFlask(__name__)
 app.config['debug'] = config.is_debug
 
+# register the routes with every module
 for name in config.modules:
     resource = __import__('{{package}}.%s.resource' % name, globals(), locals(), ['mod'], -1)
     app.register_blueprint(resource.mod)

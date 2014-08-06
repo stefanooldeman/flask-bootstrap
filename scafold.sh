@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -x
-package=dawkins
+package=meta_api
 
 [ ! -d .git ] && git init
 if [ ! -f deploy/scripts/maketag.sh ]; then
@@ -9,6 +9,23 @@ if [ ! -f deploy/scripts/maketag.sh ]; then
     mv erl-project/make/scripts/tag/maketag.sh deploy/scripts
     rm -rf erl-project
 fi
+
+# move actual project tree
+for f in `find tmp/ -type f`; do
+  sed -i "s/{{package}}/${package}/g" $f;
+done
+sed -i "s/{{email}}/$(git config --get user.email)/" tmp/setup.py
+
+mkdir -p docs/coverage
+mkdir -p deploy/{nginx,specfiles,supervisord}
+mv tmp/module $package
+mv tmp/vhost.ngx deploy/nginx/${package/_/-}-conf.ngx
+mv tmp/* .
+
+cat <<IGNORE > docs/coverage/.gitignore > tmp/.gitignore
+*
+!.gitignore
+IGNORE
 
 cat <<EOF > deploy/supervisord/${package}.ini
 [program:${package/_/-}-server]
@@ -20,21 +37,6 @@ environment=USER="${package}",HOME="/var/lib/${package}"
 directory=/opt/virtualenv/${package}/
 command=/opt/virtualenv/${package}/bin/start_gunicorn
 EOF
-
-for f in `find tmp/ -type f`; do
-  sed -i "s/{{package}}/${package}/g" $f;
-done
-sed -i "s/{{email}}/$(git config --get user.email)/" tmp/setup.py
-
-mv tmp/module $package
-mv tmp/* .
-mkdir -p docs/coverage
-mkdir -p deploy/{nginx,specfiles,supervisord}
-
-cat <<IGNORE > docs/coverage/.gitignore > tmp/.gitignore
-*
-!.gitignore
-IGNORE
 
 
 
@@ -49,5 +51,11 @@ echo "Done"
 cat <<MSG
 run the following to test the application:
   . ./venv/bin/activate
-  curl localhost:8000/
+  python run.py
+  # in a new shell run
+  curl -H "Content-Type: application/json" localhost:8000
+
+  # OR
+  ./start_gunicorn
+  curl -H "Content-Type: application/json" localhost:8000
 MSG

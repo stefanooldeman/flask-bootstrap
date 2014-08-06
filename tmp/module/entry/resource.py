@@ -1,6 +1,4 @@
-from flask import Blueprint, render_template, request, url_for, redirect
-
-from {{package}} import base_url, url_version
+from flask import Blueprint, render_template, request
 
 
 mod = Blueprint('entry', __name__, template_folder='views')
