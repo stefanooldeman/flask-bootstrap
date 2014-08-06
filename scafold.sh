@@ -34,10 +34,11 @@ directory=/opt/virtualenv/${package}/
 command=/opt/virtualenv/${package}/bin/start_gunicorn
 EOF
 
-for f in tmp/*; do
+for f in `find tmp/ -type f`; do
   sed -i "s/{{package}}/${package}/g" $f;
 done
 sed -i "s/{{email}}/$(git config --get user.email)/" tmp/setup.py
+mv tmp/module $package
 mv tmp/* .
 
 echo * > tmp/.gitignore
