@@ -3,20 +3,7 @@
 set -x
 package=dawkins
 
-mkdir -p docs/coverage
-mkdir -p deploy/{nginx,specfiles,supervisord}
-mkdir -p $package/tests/{unit,functional}
-
-touch README.md
-for dir in `find $package -type d`; do
-  touch $dir/__init__.py;
-done
-
-echo '__version__ = "0.1.0"' > $package/__init__.py
-
 [ ! -d .git ] && git init
-
-
 if [ ! -f deploy/scripts/maketag.sh ]; then
     git clone git@github.com:spilgames/erl-project.git
     mv erl-project/make/scripts/tag/maketag.sh deploy/scripts
@@ -38,11 +25,16 @@ for f in `find tmp/ -type f`; do
   sed -i "s/{{package}}/${package}/g" $f;
 done
 sed -i "s/{{email}}/$(git config --get user.email)/" tmp/setup.py
+
 mv tmp/module $package
 mv tmp/* .
+mkdir -p docs/coverage
+mkdir -p deploy/{nginx,specfiles,supervisord}
 
-echo * > tmp/.gitignore
-echo !.gitignore >> tmp/.gitignore
+cat <<IGNORE > docs/coverage/.gitignore > tmp/.gitignore
+*
+!.gitignore
+IGNORE
 
 
 
